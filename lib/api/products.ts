@@ -30,7 +30,9 @@ export type AdminProduct = {
   newExpiresAt?: string | null
   seasonalExpiresAt?: string | null
   isActive: boolean
+  stockUnlimited: boolean
   inStock: boolean
+  stockQty: number
   soldCount: number
 }
 
@@ -56,6 +58,7 @@ export type StoreProduct = {
   categorySlug?: string
   brand?: string
   model?: string
+  stockUnlimited?: boolean
   inStock: boolean
   stockQty?: number
   isNewArrival?: boolean
@@ -110,6 +113,8 @@ export type ProductFormBody = {
   attributeIds?: string[]
   statusTags?: string[]
   seasonalDays?: number
+  stockUnlimited?: boolean
+  stockQty?: number
 }
 
 export type ProductUpdateBody = Partial<ProductFormBody> & {

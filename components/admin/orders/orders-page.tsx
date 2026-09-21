@@ -6,7 +6,6 @@ import Link from "next/link"
 import { toast } from "sonner"
 
 import { OrderStatusBadge } from "@/components/orders/order-status-badge"
-import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -16,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useAuthHydrated } from "@/hooks/use-auth-hydrated"
 import { authErrorMessage } from "@/lib/api/auth"
 import {
   listAdminOrders,
@@ -27,12 +27,18 @@ import { useAuthStore } from "@/lib/auth/store"
 const SKELETON_ROWS = 6
 
 export function OrdersPage() {
+  const hydrated = useAuthHydrated()
   const token = useAuthStore((state) => state.token)
   const [items, setItems] = React.useState<Order[]>([])
   const [loading, setLoading] = React.useState(true)
 
   const load = React.useCallback(async () => {
-    if (!token) return
+    if (!hydrated) return
+    if (!token) {
+      setLoading(false)
+      setItems([])
+      return
+    }
     setLoading(true)
     try {
       const list = await listAdminOrders(token)
@@ -43,7 +49,7 @@ export function OrdersPage() {
     } finally {
       setLoading(false)
     }
-  }, [token])
+  }, [hydrated, token])
 
   React.useEffect(() => {
     void load()

@@ -105,6 +105,8 @@ export function ProductsPage() {
   const [statusTags, setStatusTags] = React.useState<ProductStatusTag[]>([])
   const [seasonalDays, setSeasonalDays] = React.useState("")
   const [description, setDescription] = React.useState("")
+  const [stockUnlimited, setStockUnlimited] = React.useState(true)
+  const [stockQty, setStockQty] = React.useState("")
   const [imageUrls, setImageUrls] = React.useState<string[]>([])
   const [pending, setPending] = React.useState(false)
   const [uploading, setUploading] = React.useState(false)
@@ -162,6 +164,8 @@ export function ProductsPage() {
     setStatusTags([])
     setSeasonalDays("")
     setDescription("")
+    setStockUnlimited(true)
+    setStockQty("")
     setImageUrls([])
     if (fileRef.current) fileRef.current.value = ""
   }
@@ -196,6 +200,9 @@ export function ProductsPage() {
         : "",
     )
     setDescription(product.description ?? "")
+    const unlimited = product.stockUnlimited ?? true
+    setStockUnlimited(unlimited)
+    setStockQty(unlimited ? "" : String(product.stockQty ?? 0))
     setImageUrls(
       product.imageUrls?.length
         ? product.imageUrls
@@ -315,6 +322,16 @@ export function ProductsPage() {
       }
     }
 
+    let nextStockQty: number | undefined
+    if (!stockUnlimited) {
+      const qty = Number(stockQty)
+      if (!Number.isInteger(qty) || qty < 0) {
+        toast.error("Soni")
+        return
+      }
+      nextStockQty = qty
+    }
+
     setPending(true)
     try {
       const body = {
@@ -333,6 +350,8 @@ export function ProductsPage() {
         statusTags,
         imageUrls,
         imageUrl: imageUrls[0],
+        stockUnlimited,
+        ...(stockUnlimited ? {} : { stockQty: nextStockQty }),
         ...(statusTags.includes("seasonal")
           ? { seasonalDays: Number(seasonalDays) }
           : {}),
@@ -366,7 +385,11 @@ export function ProductsPage() {
       (Number.isFinite(parseSomInput(salePriceAmount)) &&
         parseSomInput(salePriceAmount) >= 0)) &&
     (!statusTags.includes("seasonal") ||
-      (Number.isInteger(Number(seasonalDays)) && Number(seasonalDays) >= 1))
+      (Number.isInteger(Number(seasonalDays)) && Number(seasonalDays) >= 1)) &&
+    (stockUnlimited ||
+      (stockQty !== "" &&
+        Number.isInteger(Number(stockQty)) &&
+        Number(stockQty) >= 0))
 
   return (
     <div className="flex flex-col gap-4">
@@ -560,6 +583,35 @@ export function ProductsPage() {
                   className="h-11"
                   required
                 />
+              </div>
+
+              <div className="grid gap-1.5">
+                <Label htmlFor="product-stock-qty">Soni</Label>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <Input
+                    id="product-stock-qty"
+                    type="number"
+                    min={0}
+                    step={1}
+                    inputMode="numeric"
+                    value={stockUnlimited ? "" : stockQty}
+                    onChange={(event) => setStockQty(event.target.value)}
+                    disabled={stockUnlimited}
+                    className="h-11 sm:min-w-0 sm:flex-1"
+                    required={!stockUnlimited}
+                  />
+                  <label className="flex min-h-11 shrink-0 cursor-pointer items-center gap-3 sm:pl-1">
+                    <Switch
+                      checked={stockUnlimited}
+                      onCheckedChange={(checked) => {
+                        setStockUnlimited(checked)
+                        if (checked) setStockQty("")
+                      }}
+                      aria-label="cheksiz"
+                    />
+                    <span className="text-sm">cheksiz</span>
+                  </label>
+                </div>
               </div>
 
               <div className="grid gap-1.5">
