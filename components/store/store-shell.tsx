@@ -3,6 +3,7 @@
 import { Suspense, type ReactNode } from "react"
 import { usePathname } from "next/navigation"
 
+import { TelegramWebAppAuth } from "@/components/auth/telegram-webapp-auth"
 import { CartSync } from "@/components/store/cart-sync"
 import { FavoritesSync } from "@/components/store/favorites-sync"
 import { CatalogDialog } from "@/components/store/catalog-dialog"
@@ -29,6 +30,7 @@ export function StoreShell({
 
   return (
     <CatalogProvider>
+      <TelegramWebAppAuth />
       <CartSync />
       <FavoritesSync />
       <Suspense fallback={null}>
